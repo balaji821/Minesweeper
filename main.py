@@ -2,7 +2,7 @@ import tkinter as tk
 from functools import partial
 from grid import generateGrid,printGrid
 import math
-from tkinter.messagebox import showerror
+from tkinter.messagebox import showerror, showinfo
 
 class Minesweeper:
     ROWS = 10
@@ -13,11 +13,12 @@ class Minesweeper:
     window = None
 
     gameGrid = []
-    mineGrid = generateGrid(ROWS,COLUMNS,math.ceil((ROWS*COLUMNS)*DIFFICULTY))
+    mineGrid = []
     openset=[]
 
     def __init__(self):
         self.interface = Interface()
+        self.mineGrid = generateGrid(self.ROWS,self.COLUMNS,math.ceil((self.ROWS*self.COLUMNS)*self.DIFFICULTY))
         self.Game()
 
     def expand(self,i,j):
@@ -26,7 +27,9 @@ class Minesweeper:
         if (i,j) in self.openset:
             return
         self.openset.append((i,j))
-        self.gameGrid[i][j].destroy()
+        print(self.gameGrid[i][j])
+        if self.gameGrid[i][j].winfo_exists():
+            self.gameGrid[i][j].destroy()
         if self.mineGrid[i][j] != ' ':
             l = tk.Label(self.window,text=self.mineGrid[i][j],fg="blue")
             l.place(x=i*self.BUTTON_HEIGHT,y = j*self.BUTTON_WIDTH,height=40,width=30)
@@ -78,7 +81,6 @@ class Minesweeper:
                         highlightcolor="#37d3ff", 
                         highlightbackground="#ffffff", 
                         borderwidth=3)
-                    print(r,c)
                     try:
                         self.gameGrid[r][c].pack_forget()
                     except:
@@ -97,16 +99,37 @@ class Minesweeper:
                         borderwidth=3)
         self.gameGrid[i][j] = l
         button.destroy()
+        self.openset.append((i,j))
+        print(i,j,self.mineGrid[i][j],len(self.openset))
+        if len(self.openset) == (self.ROWS*self.COLUMNS) - (math.ceil((self.ROWS*self.COLUMNS)*self.DIFFICULTY)):
+            for r in range(self.ROWS):
+                for c in range(self.COLUMNS):
+                    l = tk.Label(self.window,text=self.mineGrid[r][c],fg="blue")
+                    l.place(x=r*self.BUTTON_HEIGHT,y = c*self.BUTTON_WIDTH,height=40,width=30)
+                    l.config(fg = '#37d3ff',
+                        bg = '#001d26',
+                        highlightthickness=4, 
+                        highlightcolor="#37d3ff", 
+                        highlightbackground="#ffffff", 
+                        borderwidth=3)
+                    try:
+                        self.gameGrid[r][c].pack_forget()
+                    except:
+                        pass
+            showinfo("Congratulations!","You successfully uncovered all the mines!!")
+            return
+        return
         # print(openset)
 
     # buttons = [tk.Button(window,text=str(i)+str(j),command=action).grid(row=i,column=j) for i in range(10) for j in range(10)]
 
     def reset(self,event):
         try:
-            self.window.destroy()
+            self.window.exit()
         except:
             pass
         self.openset = []
+        self.mineGrid = generateGrid(self.ROWS,self.COLUMNS,math.ceil((self.ROWS*self.COLUMNS)*self.DIFFICULTY))
         self.interface.deleteGame()
         self.interface.newGame()
 

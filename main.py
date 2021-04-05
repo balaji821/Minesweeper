@@ -11,6 +11,7 @@ BUTTON_WIDTH = 40
 
 
 window = tk.Tk()
+window.configure(background = '#001d26')
 window.geometry('300x400')
 gameGrid = []
 mineGrid = generateGrid(ROWS,COLUMNS,math.ceil((ROWS*COLUMNS)*DIFFICULTY))
@@ -23,12 +24,16 @@ def expand(i,j):
         return
     openset.append((i,j))
     gameGrid[i][j].destroy()
-    print("Minegrid["+str(i)+"]["+str(j)+"] : "+mineGrid[i][j]+".")
     if mineGrid[i][j] != ' ':
-        print(i,j)
         l = tk.Label(window,text=mineGrid[i][j],fg="blue")
-        l.place(x=i*BUTTON_HEIGHT,y = j*BUTTON_WIDTH)
-        l.config(height = 3, width = 3)
+        l.place(x=i*BUTTON_HEIGHT,y = j*BUTTON_WIDTH,height=40,width=30)
+        # l.config(borderwidth=1,relief="solid")
+        l.config(fg = '#37d3ff',
+                    bg = '#001d26',
+                    highlightthickness=4, 
+                    highlightcolor="#37d3ff", 
+                    highlightbackground="#ffffff", 
+                    borderwidth=3)
         gameGrid[i][j] = l
         return
     if i>0:
@@ -49,14 +54,26 @@ def expand(i,j):
         expand(i+1,j+1)
     return
 
-def action(button,i,j):
+def mark(button,i,j,event):
+    if button['text'] == '#':
+        button.config(text="")
+    else:
+        button.config(text="#")
+
+def reveal(button,i,j):
     if mineGrid[i][j]==' ':
         expand(i,j)
         return
     l = tk.Label(window,text=mineGrid[i][j],fg="blue")
     # print(mineGrid)
-    l.place(x=i*BUTTON_HEIGHT,y = j*BUTTON_WIDTH)
-    l.config(height = 2, width = 3)
+    l.place(x=i*BUTTON_HEIGHT,y = j*BUTTON_WIDTH,height=40,width=30)
+    # l.config(borderwidth=1,relief="solid")
+    l.config(fg = '#37d3ff',
+                    bg = '#001d26',
+                    highlightthickness=4, 
+                    highlightcolor="#37d3ff", 
+                    highlightbackground="#ffffff", 
+                    borderwidth=3)
     gameGrid[i][j] = l
     button.destroy()
     # print(openset)
@@ -65,12 +82,12 @@ def action(button,i,j):
 for i in range(ROWS):
     row = []
     for j in range(COLUMNS):
-        button = tk.Button(window,text=str(i)+str(j),relief = "raised")
-        button.place(x=i*BUTTON_HEIGHT,y = j*BUTTON_WIDTH)
-        button.config(command = partial(action,button,i,j))
-        button.config(height = 2, width = 3)
+        button = tk.Button(window,relief = "raised")
+        button.place(x=i*BUTTON_HEIGHT,y = j*BUTTON_WIDTH,height=40,width=30)
+        button.config(command = partial(reveal,button,i,j))
+        button.bind('<Button-3>', partial(mark,button,i,j))
+        button.config(height = 2, width = 3,fg = '#37d3ff',bg = '#001d26')
         row.append(button)
     gameGrid.append(row)
-printGrid(mineGrid)
 
 window.mainloop()

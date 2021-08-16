@@ -4,6 +4,7 @@ def printGrid(grid):
     for i in grid:
         for j in i:
             print(j,end = "\t")
+    print()
 
 def getCount(grid,i,j):
     count = 0
